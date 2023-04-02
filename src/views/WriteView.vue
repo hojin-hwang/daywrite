@@ -57,7 +57,6 @@ const getParagraphAtLocalStorage = (id) =>
     if(!localPargaraph) return;
     Object.assign(paragraph, JSON.parse(localPargaraph));
     setViewParagraph(paragraph.body);
-    //paragraph.body = util.removeHtmlTage(paragraph.body);
   }
   catch(e)
   {
