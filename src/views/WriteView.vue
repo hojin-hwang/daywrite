@@ -29,18 +29,15 @@ const readText = async (index, event)=>
 {
   if(event.keyCode === 13)//Enter
   {
-    if (!event.shiftKey)
-    {
-      event.preventDefault();
-      const new_paragraph = {
-        tag : 'p',
-        content: ``,
-      };
-      paragraph_list.splice(index+1, 0, new_paragraph);
-      await nextTick();
-      document.querySelector(`#__${index+1}`).focus();
-    }
-    
+    event.preventDefault();
+  
+    const new_paragraph = {
+      tag : 'p',
+      content: ``,
+    };
+    paragraph_list.splice(index+1, 0, new_paragraph);
+    await nextTick();
+    document.querySelector(`#__${index+1}`).focus();
   }
   else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
   {
