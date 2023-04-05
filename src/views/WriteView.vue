@@ -2,20 +2,20 @@
   <div class="about">
     <section>
       <div v-for="(paragraph, index) in paragraph_list" :key="index" >
-        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</p>
-        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</h1>
-        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</blockquote>
+        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
+        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
+        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
       </div>
     </section>
     
-    <article v-html="viewParagraph.body"></article>
-    <textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea>
+    <!-- <article v-html="viewParagraph.body"></article>
+    <textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea> -->
     <button type="button" @click="saveParagraph">SAVE</button>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted , nextTick} from 'vue'
+import { reactive, onMounted , nextTick, onUpdated} from 'vue'
 import { RouterLink,  useLink } from 'vue-router'
 import { marked } from 'marked';
 
@@ -28,10 +28,9 @@ const paragraph_list = reactive([
 
 const readText = async (index, event)=>
 {
-  if(event.keyCode === 13)
+  if(event.keyCode === 13) //enter
   {
     event.preventDefault();
-  
     const new_paragraph = {
       tag : 'p',
       content: ``,
@@ -40,17 +39,7 @@ const readText = async (index, event)=>
     await nextTick();
     document.querySelector(`#__${index+1}`).focus();
   }
-  else
-  {
-    const tag_name = readFirstWord(event.target.innerText.substring(0,10));
-    
-    if(tag_name !== event.target.tagName.toLowerCase())
-    {
-      console.log('Match!!')
-    }
-    
-  }
-  if(event.keyCode === 8)//return p tag by pressing delete key at first position 
+  else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
   {
     if(window.getSelection().anchorOffset === 0)
     {
@@ -63,6 +52,7 @@ const readText = async (index, event)=>
   }
   else //normal
   {
+    paragraph_list[index].content = event.target.innerText;
     const current_tag_name = event.target.tagName.toLowerCase();
     const tag_name = readFirstWord(event.target.innerText.substring(0,10), current_tag_name);
 
@@ -73,111 +63,23 @@ const readText = async (index, event)=>
       await nextTick();
       document.querySelector(`#__${index}`).focus();
     }
-    
-    
   }
 }
 
 //문장의 첫  단어가 마크테그인지 확인
-const readFirstWord = (str) => 
+const readFirstWord = (str, current_tag_name) => 
 {
   const first_word = str.substring(0,1);
   if(first_word === '#') return 'h1';
   else if(first_word === '>') return 'blockquote';
   else return current_tag_name;
-  // const regex = /^[^\s]+(\s[^#]+)?/;
-  // const match = str.match(regex);
-  // const result = (match)?  match[0] : 'Ops';
-  // return '#'
 }
-const changeElementTag = (target, tagName) =>
-{
-  console.log(target)
-  // var e = document.getElementsByTagName('span')[0];
-
-  const new_element = document.createElement(tagName);
-  new_element.innerHTML = target.innerHTML;
-  target.parentNode.replaceChild(new_element, target);
-
-}
-
-
-const paragraph = reactive({
-  id: 0,
-  body:'',
-  folder:{},
-  page : 1,
-  focus : true,
-});
-
-
-const paragraphEditors = reactive([]);
-paragraphEditors.push(paragraph)
-
-// computed: {
-//   paragraphEditors: function () {
-//     return _.orderBy(this.users, 'name')
-//   }
-// }
 
 onMounted(() => 
 {
-  marked.setOptions({breaks:true,gfm:true})
-  const paragraphId = useLink({...RouterLink.props}).route.value.params.id;
-  if(paragraphId) getParagraphAtLocalStorage(paragraphId);
-
+  const editors = document.querySelectorAll('.editor');
+  editors[editors.length-1].focus();
 })
-
-const viewParagraph = reactive({
-  body:'',
-})
-
-const readParagraph = (event)=>{
-  
-  viewParagraph.body = marked.parse(event.target.value);
-  paragraph.body = event.target.value
-}
-
-const readContent = (index, event)=>
-{
-  if(event.keyCode === 13)
-  {
-    event.preventDefault();
-    addNewEditor(index);
-  }
-}
-
-const addNewEditor = async (index) => 
-{
-  const paragraph_temp = reactive({
-      id:index+1,
-      body:'',
-      folder:{},
-      page : 1,
-  });
-  paragraphEditors.splice(index+1, 0, paragraph_temp);
-  console.log(paragraphEditors)
-  await nextTick();
-  document.querySelector(`p#_${index+1}`).focus();
-}
-
-const createNewEditor = (node) =>
-{
-  // const p_editor_element = document.createElement('p');
-  // p_editor_element.classList.add('editor');
-  // p_editor_element.setAttribute('contenteditable', true);
-
-  //const p_editor_element = 
-  //console.log(p_editor_element)
-  // node.after(p_editor_element);
-  // console.log(node.nextSibling.focus())
-  // const new_editor_element = node.cloneNode(true);
-  //node.after(Editor);
-}
-
-const setViewParagraph = (text)=>{
-  viewParagraph.body = marked.parse(text);
-}
 
 
 const saveParagraph = ()=>
@@ -187,25 +89,7 @@ const saveParagraph = ()=>
     body:paragraph.body,
     date:util.getNow(),
   }
-  console.log(paragraph.body);
   localStorage.setItem(storageParagraph.id, JSON.stringify(storageParagraph))
-}
-
-const getParagraphAtLocalStorage = (id) =>
-{
-  const localStorageData = localStorage.getItem(id);
-  try
-  {
-    const localPargaraph = (localStorageData)? localStorageData: null;
-    if(!localPargaraph) return;
-    Object.assign(paragraph, JSON.parse(localPargaraph));
-    setViewParagraph(paragraph.body);
-  }
-  catch(e)
-  {
-    // 
-  }
-  
 }
 
 const util = {
@@ -238,48 +122,22 @@ const util = {
 
 </script>
 <style>
-
-/* article{
-  background-image: url('../assets/image/floral-2069810_640.png');
-} */
-
 article{
-        width: 100%;
-        position: relative;
-}
-/* article::before{
-    content: "";
-    background: url('../assets/image/floral-2069810_640.png');
-    background-size: cover;
-    opacity: 0.5;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-
-    -moz-filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
-    -o-filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
-    -webkit-filter: grayscale(100%);
-    filter: gray;
-    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
-}
-article *{
+  width: 100%;
   position: relative;
-} */
+}
 
-
-p.editor{width:100%; border: 1px solid #eee;}
-textarea{width:100%;}
+.editor{width:100%; outline: none;}
+.editor:focus{border-bottom: 1px solid #eee; }
 h1{margin-bottom:12px;}
-p{margin-bottom:12px;}
+
 pre{padding: 16px;
-        overflow: auto;
-        font-size: 85%;
-        line-height: 1.45;
-        color: black;
-        background-color: #e0ebf6;
-        border-radius: 6px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    color: black;
+    background-color: #e0ebf6;
+    border-radius: 6px;
 }
 blockquote{
   margin: 16px;
@@ -288,10 +146,6 @@ blockquote{
   border-left: 0.25em solid #d0d7de;
 }  
 @media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
+  
 }
 </style>
