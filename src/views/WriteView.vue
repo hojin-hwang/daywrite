@@ -1,6 +1,12 @@
 <template>
   <div class="about">
-    <Editor @keydown="$event=>readContent(index, $event)" :id="index" v-for = "(editor, index) in paragraphEditors" :key="editor.id"></Editor>
+    <section>
+      <div v-for="(paragraph, index) in paragraph_list" :key="index" >
+        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</p>
+        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</h1>
+      </div>
+    </section>
+    
     <article v-html="viewParagraph.body"></article>
     <textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea>
     <button type="button" @click="saveParagraph">SAVE</button>
@@ -8,22 +14,75 @@
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted , nextTick} from 'vue'
 import { RouterLink,  useLink } from 'vue-router'
 import { marked } from 'marked';
 import Editor from '../components/Editor.vue';
+
+const paragraph_list = reactive([
+  {
+    tag : 'p',
+    content:'kevin'
+  },
+])
+
+const readText = async (index, event)=>
+{
+  if(event.keyCode === 13)
+  {
+    event.preventDefault();
+  
+    const new_paragraph = {
+      tag : 'p',
+      content: `${index}_${util.generateRandomString(6)}`
+    };
+    paragraph_list.splice(index+1, 0, new_paragraph);
+    await nextTick();
+    document.querySelector(`#__${index+1}`).focus();
+  }
+  else
+  {
+    //if(readFirstWord(event.target.innerText) === '#') changeElementTag(event.target, 'h1');
+  }
+}
+
+//문장의 첫  단어가 마크테그인지 확인
+const readFirstWord = (str) => 
+{
+  const regex = /^[^\s]+(\s[^#]+)?/;
+  const match = str.match(regex);
+  const result = (match)?  match[0] : 'Ops';
+  return '#'
+}
+const changeElementTag = (target, tagName) =>
+{
+  console.log(target)
+  // var e = document.getElementsByTagName('span')[0];
+
+  const new_element = document.createElement(tagName);
+  new_element.innerHTML = target.innerHTML;
+  target.parentNode.replaceChild(new_element, target);
+
+}
+
 
 const paragraph = reactive({
   id: 0,
   body:'',
   folder:{},
   page : 1,
+  focus : true,
 });
 
 
 const paragraphEditors = reactive([]);
 paragraphEditors.push(paragraph)
 
+// computed: {
+//   paragraphEditors: function () {
+//     return _.orderBy(this.users, 'name')
+//   }
+// }
 
 onMounted(() => 
 {
@@ -31,7 +90,6 @@ onMounted(() =>
   const paragraphId = useLink({...RouterLink.props}).route.value.params.id;
   if(paragraphId) getParagraphAtLocalStorage(paragraphId);
 
-  
 })
 
 const viewParagraph = reactive({
@@ -46,19 +104,25 @@ const readParagraph = (event)=>{
 
 const readContent = (index, event)=>
 {
-  console.log(index)
   if(event.keyCode === 13)
   {
     event.preventDefault();
-    const paragraph_temp = reactive({
-      id: index,
+    addNewEditor(index);
+  }
+}
+
+const addNewEditor = async (index) => 
+{
+  const paragraph_temp = reactive({
+      id:index+1,
       body:'',
       folder:{},
       page : 1,
-    });
-    paragraphEditors.splice(index+1, 0, paragraph_temp);
-    //paragraphEditors.push(paragraph_temp)
-  }
+  });
+  paragraphEditors.splice(index+1, 0, paragraph_temp);
+  console.log(paragraphEditors)
+  await nextTick();
+  document.querySelector(`p#_${index+1}`).focus();
 }
 
 const createNewEditor = (node) =>
@@ -123,11 +187,22 @@ const util = {
   {
     const htmlRegexG = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;
     return text.replace(htmlRegexG, '');
+  },
+  
+  generateRandomString : (num) => {
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < num; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 }
 
 </script>
 <style>
+
 /* article{
   background-image: url('../assets/image/floral-2069810_640.png');
 } */
