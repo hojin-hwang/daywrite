@@ -33,9 +33,8 @@ const readText = async (index, event)=>
   
     const new_paragraph = {
       tag : 'p',
-      content: `${index}_${util.generateRandomString(6)}`
+      content: ``,
     };
-    
     paragraph_list.splice(index+1, 0, new_paragraph);
     await nextTick();
     document.querySelector(`#__${index+1}`).focus();
