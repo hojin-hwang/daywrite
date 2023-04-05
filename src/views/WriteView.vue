@@ -17,7 +17,6 @@
 import { reactive, onMounted , nextTick} from 'vue'
 import { RouterLink,  useLink } from 'vue-router'
 import { marked } from 'marked';
-import Editor from '../components/Editor.vue';
 
 const paragraph_list = reactive([
   {
@@ -42,17 +41,27 @@ const readText = async (index, event)=>
   }
   else
   {
-    //if(readFirstWord(event.target.innerText) === '#') changeElementTag(event.target, 'h1');
+    const tag_name = readFirstWord(event.target.innerText.substring(0,10));
+    
+    if(tag_name !== event.target.tagName.toLowerCase())
+    {
+      console.log('Match!!')
+    }
+    
   }
 }
 
 //문장의 첫  단어가 마크테그인지 확인
 const readFirstWord = (str) => 
 {
-  const regex = /^[^\s]+(\s[^#]+)?/;
-  const match = str.match(regex);
-  const result = (match)?  match[0] : 'Ops';
-  return '#'
+  const first_word = str.substring(0,1);
+  if(first_word === '#') return 'h1';
+  else if(first_word === '>') return 'blockquote';
+  else return 'p';
+  // const regex = /^[^\s]+(\s[^#]+)?/;
+  // const match = str.match(regex);
+  // const result = (match)?  match[0] : 'Ops';
+  // return '#'
 }
 const changeElementTag = (target, tagName) =>
 {
