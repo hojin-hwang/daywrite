@@ -4,6 +4,7 @@
       <div v-for="(paragraph, index) in paragraph_list" :key="index" >
         <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</p>
         <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</h1>
+        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" >{{ paragraph.content }}</blockquote>
       </div>
     </section>
     
@@ -27,37 +28,53 @@ const paragraph_list = reactive([
 
 const readText = async (index, event)=>
 {
-  if(event.keyCode === 13)
+  if(event.keyCode === 13)//Enter
   {
     event.preventDefault();
   
     const new_paragraph = {
       tag : 'p',
-      content: `${index}_${util.generateRandomString(6)}`
+      content: ``,
     };
     paragraph_list.splice(index+1, 0, new_paragraph);
     await nextTick();
     document.querySelector(`#__${index+1}`).focus();
   }
-  else
+  else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
   {
-    const tag_name = readFirstWord(event.target.innerText.substring(0,10));
-    
-    if(tag_name !== event.target.tagName.toLowerCase())
+    if(window.getSelection().anchorOffset === 0)
     {
-      console.log('Match!!')
+      paragraph_list[index].tag = 'p';
+      paragraph_list[index].content = event.target.innerText;
+
+      await nextTick();
+      document.querySelector(`#__${index}`).focus();
     }
+  }
+  else //normal
+  {
+    const current_tag_name = event.target.tagName.toLowerCase();
+    const tag_name = readFirstWord(event.target.innerText.substring(0,10), current_tag_name);
+
+    if(tag_name !== current_tag_name)
+    {
+      paragraph_list[index].tag = tag_name;
+      paragraph_list[index].content = event.target.innerText.substring(1);
+      await nextTick();
+      document.querySelector(`#__${index}`).focus();
+    }
+    
     
   }
 }
 
 //문장의 첫  단어가 마크테그인지 확인
-const readFirstWord = (str) => 
+const readFirstWord = (str, current_tag_name) => 
 {
   const first_word = str.substring(0,1);
   if(first_word === '#') return 'h1';
   else if(first_word === '>') return 'blockquote';
-  else return 'p';
+  else return current_tag_name;
   // const regex = /^[^\s]+(\s[^#]+)?/;
   // const match = str.match(regex);
   // const result = (match)?  match[0] : 'Ops';
