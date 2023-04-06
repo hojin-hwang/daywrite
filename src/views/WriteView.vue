@@ -16,13 +16,11 @@
 
 <script setup>
 import { reactive, onMounted , nextTick, onUpdated} from 'vue'
-import { RouterLink,  useLink } from 'vue-router'
-import { marked } from 'marked';
 
 const paragraph_list = reactive([
   {
     tag : 'p',
-    content:'kevin'
+    content:''
   },
 ])
 
@@ -77,8 +75,7 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  const editors = document.querySelectorAll('.editor');
-  editors[editors.length-1].focus();
+  document.querySelector('.editor:last-child').focus()
 })
 
 
