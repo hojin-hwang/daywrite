@@ -2,20 +2,23 @@
   <div class="about">
     <section>
       <div v-for="(paragraph, index) in paragraph_list" :key="index" >
-        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
-        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
-        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true"  @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
+        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
+        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
+        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
       </div>
     </section>
     
-    <!-- <article v-html="viewParagraph.body"></article>
-    <textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea> -->
+    <article v-html="temp_text.body"></article>
+    <!--<textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea> -->
     <button type="button" @click="saveParagraph">SAVE</button>
   </div>
 </template>
 
 <script setup>
 import { reactive, onMounted , nextTick, onUpdated} from 'vue'
+import { marked } from 'marked'
+
+const temp_text = reactive({body:''})
 
 const paragraph_list = reactive([
   {
@@ -28,6 +31,7 @@ const readText = async (index, event)=>
 {
   if(event.keyCode === 13) //enter
   {
+    //paragraph_list[index].content = event.target.outerText;
     event.preventDefault();
     const new_paragraph = {
       tag : 'p',
@@ -42,7 +46,7 @@ const readText = async (index, event)=>
     if(window.getSelection().anchorOffset === 0)
     {
       paragraph_list[index].tag = 'p';
-      paragraph_list[index].content = event.target.innerText;
+      //paragraph_list[index].content = event.target.outerText;
 
       await nextTick();
       document.querySelector(`#__${index}`).focus();
@@ -50,18 +54,22 @@ const readText = async (index, event)=>
   }
   else //normal
   {
-    paragraph_list[index].content = event.target.innerText;
+    //paragraph_list[index].content = event.target.outerText;
     const current_tag_name = event.target.tagName.toLowerCase();
     const tag_name = readFirstWord(event.target.innerText.substring(0,10), current_tag_name);
-
     if(tag_name !== current_tag_name)
     {
       paragraph_list[index].tag = tag_name;
-      paragraph_list[index].content = event.target.innerText.substring(1);
+      paragraph_list[index].content = event.target.outerText.substring(1) + '\n';
       await nextTick();
       document.querySelector(`#__${index}`).focus();
     }
   }
+}
+
+const readText2 = async (index, event)=>
+{
+  paragraph_list[index].content = event.target.innerText;
 }
 
 //문장의 첫  단어가 마크테그인지 확인
@@ -78,15 +86,32 @@ onMounted(() =>
   document.querySelector('.editor:last-child').focus()
 })
 
-
 const saveParagraph = ()=>
 {
-  const storageParagraph = {
-    id:33,
-    body:paragraph.body,
-    date:util.getNow(),
+  let text = '';
+  paragraph_list.forEach(paragraph=>{
+    if(paragraph.tag === 'p')
+    {
+      text += `${paragraph.content}\n\n`;
+    }
+    else if(paragraph.tag === 'blockquote')
+    {
+      text += `> ${paragraph.content}\n\n`;
+    }
+    else if(paragraph.tag === 'h1')
+    {
+      text += `# ${paragraph.content}\n`;
+    }
+  })
+  const article_data = {
+    archiveNo : `article_${Date.now().toString()}`,
+    article : text,
+    createDate : util.getNow(),
   }
-  localStorage.setItem(storageParagraph.id, JSON.stringify(storageParagraph))
+
+  localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
+
+  temp_text.body = marked.parse((JSON.parse(localStorage.getItem(article_data.archiveNo))).article);
 }
 
 const util = {
@@ -137,9 +162,9 @@ pre{padding: 16px;
     border-radius: 6px;
 }
 blockquote{
+  display: block;
   margin: 16px;
   padding: 0 1em;
-  /* color: black; */
   border-left: 0.25em solid #d0d7de;
 }  
 @media (min-width: 1024px) {
