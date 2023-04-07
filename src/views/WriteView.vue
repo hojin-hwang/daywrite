@@ -66,7 +66,6 @@ const readText = async (index, event)=>
 {
   if(event.keyCode === 13) //enter
   {
-    //paragraph_list[index].content = event.target.outerText;
     event.preventDefault();
     const new_paragraph = {
       tag : 'p',
@@ -80,6 +79,20 @@ const readText = async (index, event)=>
   {
     if(window.getSelection().anchorOffset === 0)
     {
+      const check_text = paragraph_list[index].content.replace(/\s/gi, "");
+
+      if(check_text.length === 0 && index > 0)
+      {
+        //현재 행 지우기
+        console.log("현재행 지우기")
+        await nextTick();
+        document.querySelector(`#__${index-1}`).focus();
+        return;
+      }
+      else
+      {
+        console.log(index)
+      }
       paragraph_list[index].tag = 'p';
       await nextTick();
       document.querySelector(`#__${index}`).focus();
@@ -92,7 +105,7 @@ const readText = async (index, event)=>
     if(tag_name !== current_tag_name)
     {
       paragraph_list[index].tag = tag_name;
-      paragraph_list[index].content = event.target.outerText.substring(1) + '\n';
+      paragraph_list[index].content = event.target.innerText.substring(1) + '\n';
       await nextTick();
       document.querySelector(`#__${index}`).focus();
     }
