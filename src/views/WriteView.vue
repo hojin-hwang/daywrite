@@ -2,13 +2,13 @@
   <div class="about">
     <section>
       <div v-for="(paragraph, index) in paragraph_list" :key="index" >
-        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
-        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
-        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="readText2(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
+        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
+        <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
+        <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
       </div>
     </section>
     
-    <article v-html="temp_text.body"></article>
+    <!-- <article v-html="temp_text.body"></article> -->
     <!--<textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea> -->
     <button type="button" @click="saveParagraph">SAVE</button>
   </div>
@@ -16,16 +16,51 @@
 
 <script setup>
 import { reactive, onMounted , nextTick, onUpdated} from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 
-const temp_text = reactive({body:''})
+const router = useRouter();
+const archive_no = useRoute().params.id;
 
-const paragraph_list = reactive([
+const paragraph_list = reactive([]);
+const new_paragraph = {tag : 'p',content:'new paragraph'};
+let is_new_article = true;
+
+if(archive_no)
+{
+  //로컬을 찾아보고
+  if(localStorage.getItem(`${archive_no}`))
   {
-    tag : 'p',
-    content:''
-  },
-])
+    is_new_article = false;
+    const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
+    const temp_paragraph_array = temp_json.split('\n');
+    
+    (temp_paragraph_array).forEach(paragraph=>{
+      if(paragraph.substring(0,1) === '#')
+      {
+        paragraph_list.push({tag : 'h1',content:paragraph.substring(1)});
+      }
+      else if(paragraph.substring(0,1) === '>')
+      {
+        paragraph_list.push({tag : 'blockquote',content:paragraph.substring(1)});
+      }
+      else
+      {
+        paragraph_list.push({tag : 'p',content:paragraph});
+      }
+    })
+ 
+  }
+  else //신규다
+  {
+    paragraph_list.push(new_paragraph);
+  }
+}
+else //신규다
+{
+  paragraph_list.push(new_paragraph);
+}
+
 
 const readText = async (index, event)=>
 {
@@ -46,15 +81,12 @@ const readText = async (index, event)=>
     if(window.getSelection().anchorOffset === 0)
     {
       paragraph_list[index].tag = 'p';
-      //paragraph_list[index].content = event.target.outerText;
-
       await nextTick();
       document.querySelector(`#__${index}`).focus();
     }
   }
   else //normal
   {
-    //paragraph_list[index].content = event.target.outerText;
     const current_tag_name = event.target.tagName.toLowerCase();
     const tag_name = readFirstWord(event.target.innerText.substring(0,10), current_tag_name);
     if(tag_name !== current_tag_name)
@@ -67,7 +99,7 @@ const readText = async (index, event)=>
   }
 }
 
-const readText2 = async (index, event)=>
+const setContent = async (index, event)=>
 {
   paragraph_list[index].content = event.target.innerText;
 }
@@ -83,7 +115,8 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  document.querySelector('.editor:last-child').focus()
+  document.querySelector('.editor:last-child').focus();
+  console.log("//onMounted");
 })
 
 const saveParagraph = ()=>
@@ -104,14 +137,22 @@ const saveParagraph = ()=>
     }
   })
   const article_data = {
-    archiveNo : `article_${Date.now().toString()}`,
     article : text,
-    createDate : util.getNow(),
+  }
+
+  if(is_new_article) 
+  {
+    article_data.archiveNo = Date.now().toString();
+    article_data.createDate = util.getNow();
+  }
+  else
+  {
+    article_data.archiveNo = archive_no;
   }
 
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
-
-  temp_text.body = marked.parse((JSON.parse(localStorage.getItem(article_data.archiveNo))).article);
+  
+  router.push({name: 'readContent'});
 }
 
 const util = {

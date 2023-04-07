@@ -11,7 +11,8 @@ import HelloWorld from './components/HelloWorld.vue'
       <HelloWorld msg="Just Write!" />
       <nav>
         <RouterLink to="/playground/vue-work">Home</RouterLink>
-        <RouterLink to="/playground/vue-work/write/33">write</RouterLink>
+        <RouterLink to="/playground/vue-work/read/">Read</RouterLink>
+        <RouterLink to="/playground/vue-work/write/">write</RouterLink>
       </nav>
     </div>
   </header>
