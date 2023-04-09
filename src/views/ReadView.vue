@@ -1,7 +1,7 @@
 <template>
-  <div class="about">
+  <div class="articles">
     <h1>Read Articles</h1>
-    <section v-for="(article, index) in articleDataList" :key="index">
+    <section :id="article.archiveNo" v-for="(article, index) in articleDataList" :key="index">
       <article v-html="article.article"></article>
       <div class="create-date">
         <span>{{ article.createDate }}</span>
@@ -16,7 +16,17 @@
 
 <script setup>
 import { computed, reactive, onMounted , nextTick, onUpdated} from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
+
+const archive_no = useRoute().params.no;
+
+onMounted(()=>{
+  if(archive_no)
+  {
+    document.getElementById(`${archive_no}`).scrollIntoView();
+  }
+})
 
 const localData = reactive([]);
 
@@ -49,7 +59,7 @@ article{
   position: relative;
 }
 
-h1{margin-bottom:12px;}
+h1{margin-bottom:12px; font-size: 18px; font-weight: bold;}
 
 pre{padding: 16px;
     overflow: auto;

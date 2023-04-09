@@ -18,6 +18,12 @@ const router = createRouter({
       props : true
     },
     {
+      path: '/playground/vue-work/read/:no',
+      name: 'readContentById',
+      component: ReadView,
+      props : true
+    },
+    {
       path: '/playground/vue-work/write',
       name: 'newWrite',
       component: WriteView,
@@ -26,10 +32,6 @@ const router = createRouter({
     {
       path: '/playground/vue-work/write/:id',
       name: 'write',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      ///component: () => import('../views/AboutView.vue')
       component: WriteView,
       props : true
     }

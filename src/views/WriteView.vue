@@ -1,16 +1,15 @@
 <template>
-  <div class="about">
+  <div class="wirte-view">
     <section>
       <div v-for="(paragraph, index) in paragraph_list" :key="index" >
-        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</p>
+        <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor" :placeholder="paragraph.placeholder">{{ paragraph.content }}</p>
         <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
         <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
       </div>
     </section>
-    
-    <!-- <article v-html="temp_text.body"></article> -->
-    <!--<textarea rows="5" input="paragraph" @input="$event=>readParagraph($event)">{{paragraph.body}}</textarea> -->
-    <button type="button" @click="saveParagraph">SAVE</button>
+    <footer>
+      <button type="button" @click="saveParagraph" class="save">SAVE</button>
+    </footer>
   </div>
 </template>
 
@@ -23,7 +22,7 @@ const router = useRouter();
 const archive_no = useRoute().params.id;
 
 const paragraph_list = reactive([]);
-const new_paragraph = {tag : 'p',content:'new paragraph'};
+const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
 let is_new_article = true;
 
 if(archive_no)
@@ -33,9 +32,11 @@ if(archive_no)
   {
     is_new_article = false;
     const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
-    const temp_paragraph_array = temp_json.split('\n');
-    
-    (temp_paragraph_array).forEach(paragraph=>{
+    const temp_paragraph_array = temp_json.split('\n\n');
+
+    temp_paragraph_array.pop(); // Remove last element 
+    (temp_paragraph_array).forEach((paragraph) =>
+    {
       if(paragraph.substring(0,1) === '#')
       {
         paragraph_list.push({tag : 'h1',content:paragraph.substring(1)});
@@ -61,38 +62,49 @@ else //신규다
   paragraph_list.push(new_paragraph);
 }
 
-
 const readText = async (index, event)=>
 {
   if(event.keyCode === 13) //enter
   {
+    const selection = window.getSelection();
+    // console.log(selection.focusOffset)
+    // console.log(paragraph_list[index].content.substring(0,selection.focusOffset))
+    // console.log(paragraph_list[index].content.substring(selection.focusOffset))
     event.preventDefault();
+    const after_content = paragraph_list[index].content.substring(selection.focusOffset);
+    paragraph_list[index].content = paragraph_list[index].content.substring(0,selection.focusOffset)
     const new_paragraph = {
       tag : 'p',
-      content: ``,
+      content: after_content,
     };
     paragraph_list.splice(index+1, 0, new_paragraph);
     await nextTick();
-    document.querySelector(`#__${index+1}`).focus();
+    const next_editor = document.querySelector(`#__${index+1}`);
+    
+    
+    const range = document.createRange(); 
+    range.selectNodeContents(next_editor); 
+    range.collapse(false); 
+    const after_selection = window.getSelection();
+    after_selection.removeAllRanges(); //remove any selections already made
+    after_selection.addRange(range); 
+
   }
   else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
   {
     if(window.getSelection().anchorOffset === 0)
     {
-      const check_text = paragraph_list[index].content.replace(/\s/gi, "");
+      const check_text = paragraph_list[index].content.replace(/\s/g, "");
 
       if(check_text.length === 0 && index > 0)
       {
         //현재 행 지우기
-        console.log("현재행 지우기")
+        paragraph_list.splice(index, 1);
         await nextTick();
         document.querySelector(`#__${index-1}`).focus();
         return;
       }
-      else
-      {
-        console.log(index)
-      }
+
       paragraph_list[index].tag = 'p';
       await nextTick();
       document.querySelector(`#__${index}`).focus();
@@ -129,7 +141,6 @@ const readFirstWord = (str, current_tag_name) =>
 onMounted(() => 
 {
   document.querySelector('.editor:last-child').focus();
-  console.log("//onMounted");
 })
 
 const saveParagraph = ()=>
@@ -138,7 +149,7 @@ const saveParagraph = ()=>
   paragraph_list.forEach(paragraph=>{
     if(paragraph.tag === 'p')
     {
-      text += `${paragraph.content}\n\n`;
+      text += `${paragraph.content}  \n\n`;
     }
     else if(paragraph.tag === 'blockquote')
     {
@@ -146,7 +157,7 @@ const saveParagraph = ()=>
     }
     else if(paragraph.tag === 'h1')
     {
-      text += `# ${paragraph.content}\n`;
+      text += `# ${paragraph.content}\n\n`;
     }
   })
   const article_data = {
@@ -161,11 +172,10 @@ const saveParagraph = ()=>
   else
   {
     article_data.archiveNo = archive_no;
+    if(!article_data.createDate) article_data.createDate = util.getNow();
   }
-
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
-  
-  router.push({name: 'readContent'});
+  router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
 }
 
 const util = {
@@ -198,6 +208,9 @@ const util = {
 
 </script>
 <style>
+.wirte-view{
+  padding-top: 12px;
+}
 article{
   width: 100%;
   position: relative;
@@ -205,6 +218,13 @@ article{
 
 .editor{width:100%; outline: none;}
 .editor:focus{border-bottom: 1px solid #eee; }
+
+[contenteditable=true]:empty:before
+{
+  content: attr(placeholder);
+  /* display: block; For Firefox */
+}
+
 h1{margin-bottom:12px;}
 
 pre{padding: 16px;
@@ -215,12 +235,35 @@ pre{padding: 16px;
     background-color: #e0ebf6;
     border-radius: 6px;
 }
+
 blockquote{
   display: block;
   margin: 16px;
   padding: 0 1em;
   border-left: 0.25em solid #d0d7de;
-}  
+} 
+
+footer
+{
+  display: flex;
+  justify-content: flex-end;
+}
+
+button.save{
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  justify-content: flex-end;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 18px;
+  padding: 12px;
+}
+button.save:hover{
+  background-color: hsla(160, 100%, 37%, 0.2);
+}
+
+
 @media (min-width: 1024px) {
   
 }
