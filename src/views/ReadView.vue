@@ -8,8 +8,8 @@
       <div class="create-date">
         <span>{{ article.createDate }}</span>
       </div>
-      <button class="modify-article-btn" @click="goEditor(article)"> ⚙️
-        <!-- <RouterLink :to="article.path">⚙️</RouterLink>  -->
+      <button class="modify-article-btn"> 
+        <RouterLink :to="article.path">⚙️</RouterLink> 
       </button>  
       <hr>
     </section>
@@ -23,9 +23,6 @@ import { marked } from 'marked'
 import WriteView from './WriteView.vue';
 
 const archive_no = useRoute().params.no;
-const router = useRouter();
-const editor_mode = ref(false);
-let current_article = reactive({});
 
 onMounted(()=>{
   if(archive_no)
@@ -84,15 +81,6 @@ const articleDataList = computed(()=>
   return localData;
 })
 
-const goEditor = (article) =>
-{
-  editor_mode.value = true;
-  current_article = article;
-  // Object.assign(article,current_article);
-  // console.log(article.value);
-  // console.log(current_article);
-  //router.push({name: 'write', params:{id:id, } });
-}
 
 </script>
 <style>
@@ -127,12 +115,11 @@ hr{
 .modify-article-btn
 {
   background: unset;
-  border: none;
-  position: absolute;
-  top: 0;
-  right: 0;
+    border: none;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
-.modify-article-btn:hover{cursor: pointer;}
 .create-date{
   text-align: right;
   color: gray;
