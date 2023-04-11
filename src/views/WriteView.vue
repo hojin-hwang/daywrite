@@ -21,6 +21,9 @@ import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter();
 const archive_no = useRoute().params.id;
+const props = defineProps(['article'])
+
+console.log(props.article)
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};

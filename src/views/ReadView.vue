@@ -1,12 +1,14 @@
 <template>
-  <div class="articles">
+  <WriteView v-if="editor_mode" v-bind:article="current_article"></WriteView>
+  
+  <div class="articles" v-if="!editor_mode">
     <h1>Read Articles</h1>
     <section :id="article.archiveNo" v-for="(article, index) in articleDataList" :key="index">
       <article v-html="article.article"></article>
       <div class="create-date">
         <span>{{ article.createDate }}</span>
       </div>
-      <button class="modify-article-btn" @click="goEditor(article.archiveNo, index)"> ⚙️
+      <button class="modify-article-btn" @click="goEditor(article)"> ⚙️
         <!-- <RouterLink :to="article.path">⚙️</RouterLink>  -->
       </button>  
       <hr>
@@ -15,12 +17,15 @@
 </template>
 
 <script setup>
-import { computed, reactive, onMounted , nextTick, onUpdated} from 'vue'
+import { computed, reactive, onMounted , nextTick, onUpdated, ref} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
+import WriteView from './WriteView.vue';
 
 const archive_no = useRoute().params.no;
 const router = useRouter();
+const editor_mode = ref(false);
+let current_article = reactive({});
 
 onMounted(()=>{
   if(archive_no)
@@ -51,11 +56,14 @@ const articleDataList = computed(()=>
   return localData;
 })
 
-const goEditor = (id, index) =>
+const goEditor = (article) =>
 {
-  const pre_index = (index === 0)? 0 : index-1;
-  const pre_archive_no = articleDataList.value[pre_index].archiveNo;
-  router.push({name: 'write', params:{id:id, } });
+  editor_mode.value = true;
+  current_article = article;
+  // Object.assign(article,current_article);
+  // console.log(article.value);
+  // console.log(current_article);
+  //router.push({name: 'write', params:{id:id, } });
 }
 
 </script>
