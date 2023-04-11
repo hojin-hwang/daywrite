@@ -9,7 +9,9 @@
     </section>
     <footer>
       <button type="button" @click="deleteParagraph" class="action delete">DEL</button>
-      <button type="button" @click="saveParagraph" class="action save">SAVE</button>
+      <!-- <button type="button" @click="saveParagraph" class="action save">SAVE</button> -->
+      <button type="button" @click="$emit('saveParagraph', paragraph_list)" class="action save">SAVE</button>
+
     </footer>
   </div>
 </template>
@@ -19,25 +21,23 @@ import { reactive, onMounted , nextTick,} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 // import { marked } from 'marked'
 
-const router = useRouter();
-const archive_no = useRoute().params.id;
+//const router = useRouter();
+//const archive_no = useRoute().params.id;
 const props = defineProps(['article'])
-
-console.log(props.article)
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
 const empty_paragraph = {tag : 'p',content:'', placeholder:""};
 let is_new_article = true;
 let create_date = null;
-if(archive_no)
+if(props.article.archiveNo)
 {
   //로컬을 찾아보고
-  if(localStorage.getItem(`${archive_no}`))
+  if(localStorage.getItem(`${props.article.archiveNo}`))
   {
     is_new_article = false;
-    const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
-    create_date = JSON.parse(localStorage.getItem(`${archive_no}`)).createDate;
+    const temp_json = JSON.parse(localStorage.getItem(`${props.article.archiveNo}`)).article;
+    create_date = JSON.parse(localStorage.getItem(`${props.article.archiveNo}`)).createDate;
     const temp_paragraph_array = temp_json.split('\n\n');
 
     temp_paragraph_array.pop(); // Remove last element 
@@ -180,7 +180,7 @@ const saveParagraph = ()=>
     article : text,
   }
 
-  article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no
+  article_data.archiveNo = (is_new_article)? Date.now().toString() : props.article.archiveNo
   article_data.createDate = (create_date)? create_date : util.getNow();
 
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
@@ -189,9 +189,9 @@ const saveParagraph = ()=>
 
 const deleteParagraph = ()=>
 {
-  if(archive_no && localStorage.getItem(archive_no)) 
+  if(props.article.archiveNo && localStorage.getItem(props.article.archiveNo)) 
   {
-    localStorage.removeItem(archive_no);
+    localStorage.removeItem(props.article.archiveNo);
   }
   router.push({name: 'readContent'});
 }
