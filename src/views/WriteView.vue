@@ -1,7 +1,7 @@
 <template>
   <div class="wirte-view">
     <section>
-      <div v-for="(paragraph, index) in paragraph_list" :key="index" >
+      <div v-for="(paragraph, index) of paragraph_list" :key="index" >
         <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor" :placeholder="paragraph.placeholder">{{ paragraph.content }}</p>
         <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
         <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>

@@ -1,7 +1,7 @@
 <template>
   <div class="articles">
     <h1>Read Articles</h1>
-    <section :id="article.archiveNo" v-for="(article, index) in articleDataList" :key="index">
+    <section :id="article.archiveNo" v-for="(article, index) of articleDataList" :key="index">
       <article v-html="article.article"></article>
       <div class="create-date">
         <span>{{ article.createDate }}</span>
