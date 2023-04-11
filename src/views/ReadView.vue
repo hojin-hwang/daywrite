@@ -6,8 +6,8 @@
       <div class="create-date">
         <span>{{ article.createDate }}</span>
       </div>
-      <button class="modify-article-btn"> 
-        <RouterLink :to="article.path">⚙️</RouterLink> 
+      <button class="modify-article-btn" @click="goEditor(article.archiveNo, index)"> ⚙️
+        <!-- <RouterLink :to="article.path">⚙️</RouterLink>  -->
       </button>  
       <hr>
     </section>
@@ -20,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 
 const archive_no = useRoute().params.no;
+const router = useRouter();
 
 onMounted(()=>{
   if(archive_no)
@@ -50,7 +51,12 @@ const articleDataList = computed(()=>
   return localData;
 })
 
-
+const goEditor = (id, index) =>
+{
+  const pre_index = (index === 0)? 0 : index-1;
+  const pre_archive_no = articleDataList.value[pre_index].archiveNo;
+  router.push({name: 'write', params:{id:id, } });
+}
 
 </script>
 <style>
@@ -85,11 +91,12 @@ hr{
 .modify-article-btn
 {
   background: unset;
-    border: none;
-    position: absolute;
-    top: 0;
-    right: 0;
+  border: none;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
+.modify-article-btn:hover{cursor: pointer;}
 .create-date{
   text-align: right;
   color: gray;
