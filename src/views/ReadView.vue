@@ -1,7 +1,5 @@
 <template>
-  <WriteView v-if="editor_mode" v-bind:article="current_article" @save-paragraph="saveParagraph"></WriteView>
-  
-  <div class="articles" v-if="!editor_mode">
+  <div class="articles">
     <h1>Read Articles</h1>
     <section :id="article.archiveNo" v-for="(article, index) in articleDataList" :key="index">
       <article v-html="article.article"></article>
@@ -30,34 +28,6 @@ onMounted(()=>{
     document.getElementById(`${archive_no}`).scrollIntoView();
   }
 })
-
-const saveParagraph = (paragraph_list, archive_no)=>{
-  let text = '';
-  paragraph_list.forEach(paragraph=>{
-    if(paragraph.tag === 'p')
-    {
-      text += `${paragraph.content}  \n\n`;
-    }
-    else if(paragraph.tag === 'blockquote')
-    {
-      text += `> ${paragraph.content}\n\n`;
-    }
-    else if(paragraph.tag === 'h1')
-    {
-      text += `# ${paragraph.content}\n\n`;
-    }
-  })
-  const article_data = {
-    article : text,
-  }
-
-  article_data.archiveNo = (current_article)? current_article.archiveNo : Date.now().toString();
-  article_data.createDate = (current_article)? current_article.createDate : util.getNow();
-
-  localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
-  editor_mode.value = false;
-  console.log(articleDataList)
-}
 
 const localData = reactive([]);
 

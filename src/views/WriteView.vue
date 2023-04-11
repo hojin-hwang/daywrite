@@ -20,18 +20,19 @@ import { reactive, onMounted , nextTick, onUpdated} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 
-//const router = useRouter();
-//const archive_no = useRoute().params.id;
+const router = useRouter();
+const archive_no = useRoute().params.id;
 const props = defineProps(['article'])
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
+const blank_line = {tag : 'p',content:'', placeholder:""};
 let is_new_article = true;
 
 if(archive_no)
 {
   //로컬을 찾아보고
-  if(localStorage.getItem(`${props.article.archiveNo}`))
+  if(localStorage.getItem(`${archive_no}`))
   {
     is_new_article = false;
     const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
@@ -58,11 +59,13 @@ if(archive_no)
   else //신규다
   {
     paragraph_list.push(new_paragraph);
+    paragraph_list.push(blank_line);
   }
 }
 else //신규다
 {
   paragraph_list.push(new_paragraph);
+  paragraph_list.push(blank_line);
 }
 
 const readText = async (index, event)=>
@@ -83,14 +86,14 @@ const readText = async (index, event)=>
     paragraph_list.splice(index+1, 0, new_paragraph);
     await nextTick();
     const next_editor = document.querySelector(`#__${index+1}`);
+    next_editor.focus();
     
-    
-    const range = document.createRange(); 
-    range.selectNodeContents(next_editor); 
-    range.collapse(false); 
-    const after_selection = window.getSelection();
-    after_selection.removeAllRanges(); //remove any selections already made
-    after_selection.addRange(range); 
+    // const range = document.createRange(); 
+    // range.selectNodeContents(next_editor); 
+    // range.collapse(false); 
+    // const after_selection = window.getSelection();
+    // after_selection.removeAllRanges(); //remove any selections already made
+    // after_selection.addRange(range); 
 
   }
   else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
@@ -183,9 +186,9 @@ const saveParagraph = ()=>
 
 const deleteParagraph = ()=>
 {
-  if(props.article.archiveNo && localStorage.getItem(props.article.archiveNo)) 
+  if(archive_no && localStorage.getItem(archive_no)) 
   {
-    localStorage.removeItem(props.article.archiveNo);
+    localStorage.removeItem(archive_no);
   }
   router.push({name: 'readContent'});
 }
@@ -236,7 +239,7 @@ article{
   /* display: block; For Firefox */
 }
 
-h1{margin-bottom:12px;}
+h1{margin-bottom:12px;font-size:24px!important;}
 
 pre{padding: 16px;
     overflow: auto;
@@ -256,12 +259,12 @@ blockquote{
 
 footer
 {
+  padding-top: 48px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
-button.save{
-  color: hsla(160, 100%, 37%, 1);
+button.action{
   transition: 0.4s;
   justify-content: flex-end;
   cursor: pointer;
@@ -270,9 +273,10 @@ button.save{
   font-size: 18px;
   padding: 12px;
 }
-button.save:hover{
-  background-color: hsla(160, 100%, 37%, 0.2);
-}
+button.save{ color: hsla(160, 100%, 37%, 1);}
+button.save:hover{background-color: hsla(160, 100%, 37%, 0.2);}
+button.delete{ color: rgb(189, 63, 0);}
+button.delete:hover{background-color: hsla(33, 100%, 37%, 0.2);}
 
 
 @media (min-width: 1024px) {
