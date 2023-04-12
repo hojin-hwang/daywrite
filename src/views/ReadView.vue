@@ -1,6 +1,6 @@
 <template>
   <div class="articles">
-    <h1>Read Articles </h1>
+    <h1>Read Articles! </h1>
     <section :id="article.archiveNo" v-for="(article, index) of store.localData" :key="index">
       <article v-html="article.article"></article>
       <div class="create-date">
