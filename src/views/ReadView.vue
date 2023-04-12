@@ -1,7 +1,7 @@
 <template>
   <div class="articles">
-    <h1>Read Articles</h1>
-    <section :id="article.archiveNo" v-for="(article, index) in articleDataList" :key="index">
+    <h1>Read Articles </h1>
+    <section :id="article.archiveNo" v-for="(article, index) of store.localData" :key="index">
       <article v-html="article.article"></article>
       <div class="create-date">
         <span>{{ article.createDate }}</span>
@@ -18,39 +18,20 @@
 import { computed, reactive, onMounted , nextTick, onUpdated, ref} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
-import WriteView from './WriteView.vue';
+import { useArticleStore } from '@/stores/article.js'
 
 const archive_no = useRoute().params.no;
+const router = useRouter();
+const store = useArticleStore()
 
 onMounted(()=>{
-  if(archive_no)
-  {
-    document.getElementById(`${archive_no}`).scrollIntoView();
-  }
+  if(archive_no) document.getElementById(`${archive_no}`)?.scrollIntoView();
 })
 
-const localData = reactive([]);
-
-const articleDataList = computed(()=>
+const goEditor = (id) =>
 {
-  for (let i = 0; i < localStorage.length; i++) 
-  {
-    if(localStorage.key(i) === 'folder') continue;
-    
-    const articleData = JSON.parse(localStorage.getItem(localStorage.key(i)));
-    articleData.article = marked.parse(articleData.article)
-    articleData.path = `/playground/vue-work/write/${articleData.archiveNo}`;
-    localData.push(articleData);
-  }
-
-  localData.sort((a, b) => {
-    if(a.archiveNo < b.archiveNo) return 1;
-    if(a.archiveNo === b.archiveNo) return 0;
-    if(a.archiveNo > b.archiveNo) return -1;
-  });
-  return localData;
-})
-
+  router.push({name: 'write', params:{id:id, } });
+}
 
 </script>
 <style>

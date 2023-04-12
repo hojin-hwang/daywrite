@@ -1,7 +1,7 @@
 <template>
   <div class="wirte-view">
     <section>
-      <div v-for="(paragraph, index) in paragraph_list" :key="index" >
+      <div v-for="(paragraph, index) of paragraph_list" :key="index" >
         <p v-if="(paragraph.tag === 'p')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor" :placeholder="paragraph.placeholder">{{ paragraph.content }}</p>
         <h1 v-else-if="(paragraph.tag === 'h1')" :id="'__'+index" contenteditable="true"  @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</h1>
         <blockquote v-else-if="(paragraph.tag === 'blockquote')" :id="'__'+index" contenteditable="true" @keyup="setContent(index, $event)" @keydown="$event=>readText(index, $event)" class="editor">{{ paragraph.content }}</blockquote>
@@ -18,11 +18,10 @@
 <script setup>
 import { reactive, onMounted , nextTick, onUpdated} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { marked } from 'marked'
+// import { marked } from 'marked'
 
 const router = useRouter();
 const archive_no = useRoute().params.id;
-const props = defineProps(['article'])
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
@@ -101,7 +100,6 @@ const readText = async (index, event)=>
     if(window.getSelection().anchorOffset === 0)
     {
       const check_text = paragraph_list[index].content.replace(/\s/g, "");
-
       if(check_text.length === 0 && index > 0)
       {
         //현재 행 지우기
@@ -146,7 +144,7 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  document.querySelector('.editor:last-child').focus();
+  document.querySelector('.editor:last-child')?.focus();
 })
 
 const saveParagraph = ()=>
@@ -170,16 +168,9 @@ const saveParagraph = ()=>
     article : text,
   }
 
-  if(is_new_article) 
-  {
-    article_data.archiveNo = Date.now().toString();
-    article_data.createDate = util.getNow();
-  }
-  else
-  {
-    article_data.archiveNo = archive_no;
-    if(!article_data.createDate) article_data.createDate = util.getNow();
-  }
+  article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no
+  article_data.createDate = (create_date)? create_date : util.getNow();
+
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
   router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
 }
