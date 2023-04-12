@@ -22,7 +22,7 @@ import { useArticleStore } from '@/stores/article.js'
 
 const archive_no = useRoute().params.no;
 const router = useRouter();
-const store = useArticleStore()
+const store = useArticleStore();
 
 onMounted(()=>{
   if(archive_no) document.getElementById(`${archive_no}`)?.scrollIntoView();

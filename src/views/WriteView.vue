@@ -18,16 +18,19 @@
 <script setup>
 import { reactive, onMounted , nextTick, onUpdated} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useArticleStore } from '@/stores/article.js'
+
 // import { marked } from 'marked'
 
 const router = useRouter();
 const archive_no = useRoute().params.id;
+const store = useArticleStore();
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
 const blank_line = {tag : 'p',content:'', placeholder:""};
 let is_new_article = true;
-
+let create_date;
 if(archive_no)
 {
   //로컬을 찾아보고
@@ -36,6 +39,7 @@ if(archive_no)
     is_new_article = false;
     const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
     const temp_paragraph_array = temp_json.split('\n\n');
+    create_date = JSON.parse(localStorage.getItem(`${archive_no}`)).createDate;
 
     temp_paragraph_array.pop(); // Remove last element 
     (temp_paragraph_array).forEach((paragraph) =>
@@ -168,9 +172,10 @@ const saveParagraph = ()=>
     article : text,
   }
 
-  article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no
+  article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no;
   article_data.createDate = (create_date)? create_date : util.getNow();
-
+  store.addArticle(article_data) ;
+  
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
   router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
 }
