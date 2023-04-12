@@ -26,7 +26,9 @@ export const useArticleStore = defineStore('counter', () => {
         return temp_array;
   }
 
-  function addArticle(article) {
+  function addArticle(article) 
+  {
+    article.article = marked.parse(article.article)
     localData.unshift(article);
   }
 
