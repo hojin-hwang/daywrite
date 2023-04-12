@@ -17,10 +17,15 @@
 <script setup>
 import { reactive, onMounted , nextTick,} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useArticleStore } from '@/stores/article.js'
 // import { marked } from 'marked'
 
 const router = useRouter();
 const archive_no = useRoute().params.id;
+
+const store = useArticleStore();
+
+console.log(store.count)
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
@@ -101,7 +106,7 @@ const readText = async (index, event)=>
     if(window.getSelection().anchorOffset === 0)
     {
       const check_text = paragraph_list[index].content.replace(/\s/g, "");
-      if(check_text.length === 0 && index > 0)
+      if(check_text.length === 0 && (index > 0 || paragraph_list[index+1]))
       {
         //현재 행 지우기
         paragraph_list.splice(index, 1);
