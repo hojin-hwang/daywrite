@@ -25,7 +25,6 @@ const archive_no = useRoute().params.id;
 
 const store = useArticleStore();
 
-console.log(store.count)
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
@@ -185,6 +184,9 @@ const saveParagraph = ()=>
   article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no
   article_data.createDate = (create_date)? create_date : util.getNow();
 
+  if(is_new_article) store.addArticle(article_data);
+  else store.updateArticle(article_data);
+  
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
   router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
 }
