@@ -28,7 +28,8 @@ export const useArticleStore = defineStore('counter', () => {
 
   function addArticle(article) 
   {
-    article.article = marked.parse(article.article)
+    article.article = marked.parse(article.article);
+    article.path = `/playground/vue-work/write/${article.archiveNo}`;
     localData.unshift(article);
   }
 

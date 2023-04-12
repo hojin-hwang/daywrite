@@ -157,7 +157,7 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  document.querySelector('.editor:last-child').focus();
+  document.querySelector('.editor:last-child')?.focus();
 })
 
 const saveParagraph = ()=>
@@ -184,8 +184,8 @@ const saveParagraph = ()=>
   article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no
   article_data.createDate = (create_date)? create_date : util.getNow();
 
-  if(is_new_article) store.addArticle(article_data);
-  else store.updateArticle(article_data);
+  // if(is_new_article) store.addArticle(article_data);
+  // else store.updateArticle(article_data);
   
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
   router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
