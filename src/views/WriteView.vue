@@ -235,6 +235,7 @@ article{
 .editor:focus{border-bottom: 1px solid #eee; }
 
 [contenteditable=true]:empty:before
+
 {
   content: attr(placeholder);
   /* display: block; For Firefox */
