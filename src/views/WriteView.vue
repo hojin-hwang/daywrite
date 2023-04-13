@@ -23,7 +23,7 @@ import { useArticleStore } from '@/stores/article.js'
 // import { marked } from 'marked'
 
 const router = useRouter();
-const archive_no = useRoute().params.id;
+const index = (useRoute().params.id)? useRoute().params.id: null;
 const store = useArticleStore();
 
 const paragraph_list = reactive([]);
@@ -31,15 +31,13 @@ const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용
 const blank_line = {tag : 'p',content:'', placeholder:""};
 let is_new_article = true;
 let create_date;
-if(archive_no)
+
+
+if(store.localData[index])
 {
-  //로컬을 찾아보고
-  if(localStorage.getItem(`${archive_no}`))
-  {
     is_new_article = false;
-    const temp_json = JSON.parse(localStorage.getItem(`${archive_no}`)).article;
-    const temp_paragraph_array = temp_json.split('\n\n');
-    create_date = JSON.parse(localStorage.getItem(`${archive_no}`)).createDate;
+    const temp_paragraph_array = store.localData[index].article.split('\n\n');
+    create_date = store.localData[index].createDate;
 
     temp_paragraph_array.pop(); // Remove last element 
     (temp_paragraph_array).forEach((paragraph) =>
@@ -57,13 +55,6 @@ if(archive_no)
         paragraph_list.push({tag : 'p',content:paragraph});
       }
     })
- 
-  }
-  else //신규다
-  {
-    paragraph_list.push(new_paragraph);
-    paragraph_list.push(blank_line);
-  }
 }
 else //신규다
 {
@@ -76,9 +67,6 @@ const readText = async (index, event)=>
   if(event.keyCode === 13) //enter
   {
     const selection = window.getSelection();
-    // console.log(selection.focusOffset)
-    // console.log(paragraph_list[index].content.substring(0,selection.focusOffset))
-    // console.log(paragraph_list[index].content.substring(selection.focusOffset))
     event.preventDefault();
     const after_content = paragraph_list[index].content.substring(selection.focusOffset);
     paragraph_list[index].content = paragraph_list[index].content.substring(0,selection.focusOffset)
@@ -99,7 +87,7 @@ const readText = async (index, event)=>
     // after_selection.addRange(range); 
 
   }
-  else if(event.keyCode === 8)//return p tag by pressing delete key at first position 
+  else if(event.keyCode === 8)//Delete return p tag by pressing delete key at first position 
   {
     if(window.getSelection().anchorOffset === 0)
     {
@@ -118,6 +106,14 @@ const readText = async (index, event)=>
       document.querySelector(`#__${index}`).focus();
     }
   }
+  else if(event.keyCode === 40)
+  {
+    document.querySelector(`#__${index+1}`)?.focus();
+  }
+  else if(event.keyCode === 38)
+  {
+    document.querySelector(`#__${index-1}`)?.focus();
+  }
   else //normal
   {
     const current_tag_name = event.target.tagName.toLowerCase();
@@ -132,10 +128,7 @@ const readText = async (index, event)=>
   }
 }
 
-const setContent = async (index, event)=>
-{
-  paragraph_list[index].content = event.target.innerText;
-}
+const setContent = async (index, event)=> paragraph_list[index].content = event.target.innerText;
 
 //문장의 첫  단어가 마크테그인지 확인
 const readFirstWord = (str, current_tag_name) => 
@@ -168,26 +161,37 @@ const saveParagraph = ()=>
       text += `# ${paragraph.content}\n\n`;
     }
   })
-  const article_data = {
-    article : text,
-  }
 
-  article_data.archiveNo = (is_new_article)? Date.now().toString() : archive_no;
+  const article_data = {  article : text, }
+
+  article_data.archiveNo = (is_new_article)? Date.now().toString() : store.localData[index].archiveNo;
   article_data.createDate = (create_date)? create_date : util.getNow();
-  store.addArticle(article_data) ;
   
   localStorage.setItem(article_data.archiveNo, JSON.stringify(article_data));
-  router.push({name: 'readContentById', params:{no:article_data.archiveNo} });
+  
+  if(is_new_article) 
+  {
+    store.addArticle(article_data) ;
+    router.push({name: 'readContent' });
+  }
+  else 
+  {
+    store.updateArticle(article_data, index) ;
+    router.push({name: 'readContentById', params:{no:index} });
+  }
+  
 }
 
 const deleteParagraph = ()=>
 {
-  if(archive_no && localStorage.getItem(archive_no)) 
+  if(store.localData[index].archiveNo && localStorage.getItem(store.localData[index].archiveNo)) 
   {
-    localStorage.removeItem(archive_no);
+    localStorage.removeItem(store.localData[index].archiveNo);
+    store.deleteArticle(index);
   }
-  router.push({name: 'readContent'});
+  router.push({name: 'readContentById', params:{no:index}});
 }
+
 const util = {
   getNow : () =>
   {
@@ -199,6 +203,7 @@ const util = {
       if(day < 10) {day = "0" + day};
       return year + "-" + month + "-" + day + " " + date.toLocaleTimeString();
   },
+
   removeHtmlTage : (text) => 
   {
     const htmlRegexG = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;

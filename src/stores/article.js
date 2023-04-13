@@ -13,7 +13,7 @@ export const useArticleStore = defineStore('counter', () => {
             if(localStorage.key(i) === 'folder') continue;
 
             const articleData = JSON.parse(localStorage.getItem(localStorage.key(i)));
-            articleData.article = marked.parse(articleData.article)
+            articleData.html = marked.parse(articleData.article)
             articleData.path = `/playground/vue-work/write/${articleData.archiveNo}`;
             temp_array.push(articleData);
         }
@@ -28,15 +28,21 @@ export const useArticleStore = defineStore('counter', () => {
 
   function addArticle(article) 
   {
-    article.article = marked.parse(article.article);
+    article.html = marked.parse(article.article);
     article.path = `/playground/vue-work/write/${article.archiveNo}`;
     localData.unshift(article);
   }
 
-  function updateArticle(article)
+  function updateArticle(article, index)
   {
-    console.log(article)
+    localData[index].html = marked.parse(article.article);
+    localData[index].article = (article.article);
   }
 
-  return { localData, addArticle , updateArticle}
+  function deleteArticle(index)
+  {
+    localData.splice(index,1);
+  }
+
+  return { localData, addArticle , updateArticle, deleteArticle}
 })

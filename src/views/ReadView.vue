@@ -1,13 +1,14 @@
 <template>
   <div class="articles">
     <h1>Read Articles! </h1>
-    <section :id="article.archiveNo" v-for="(article, index) of store.localData" :key="index">
-      <article v-html="article.article"></article>
+    <section :id="index" v-for="(article, index) of store.localData" :key="index">
+      <article v-html="article.html"></article>
       <div class="create-date">
         <span>{{ article.createDate }}</span>
       </div>
       <button class="modify-article-btn"> 
-        <RouterLink :to="article.path">⚙️</RouterLink> 
+        <!-- <RouterLink :to="article.path">⚙️</RouterLink>  -->
+        <RouterLink :to="`/playground/vue-work/write/${index}`">⚙️</RouterLink>
       </button>  
       <hr>
     </section>
@@ -20,12 +21,23 @@ import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import { useArticleStore } from '@/stores/article.js'
 
-const archive_no = useRoute().params.no;
+const index_no = useRoute().params.no;
 const router = useRouter();
 const store = useArticleStore();
 
 onMounted(()=>{
-  if(archive_no) document.getElementById(`${archive_no}`)?.scrollIntoView();
+  
+  if(index_no) 
+  {
+    if(document.getElementById(`${index_no}`))
+    {
+      document.getElementById(`${index_no}`).scrollIntoView();
+    }
+    else 
+    {
+      document.getElementById(`${store.localData.length - 1}`)?.scrollIntoView();
+    }
+  }
 })
 
 const goEditor = (id) =>
