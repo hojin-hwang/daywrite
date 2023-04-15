@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   msg: {
     type: String,
@@ -9,14 +11,30 @@ defineProps({
 
 <template>
   <div class="greetings">
-    <h1 class="green">{{ msg }}</h1>
-    <h3>
-      You’ve successfully created a project with
-    </h3>
+    <section class="header">
+      <h1 class="green"><RouterLink to="/playground/vue-work">{{ msg }}</RouterLink></h1>
+      <nav>
+        <RouterLink to="/playground/vue-work/read/">Read</RouterLink>
+        <RouterLink to="/playground/vue-work/write/">write</RouterLink>
+      </nav>
+    </section>
+    
+    <p>
+      한문장을 써보세요. 당신의 인생을 바꿔보세요.
+    </p>
   </div>
 </template>
 
 <style scoped>
+section.header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+nav{
+  display: flex;
+  gap:12px;
+}
 h1 {
   font-weight: 500;
   font-size: 2.6rem;
