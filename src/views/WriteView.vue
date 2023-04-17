@@ -42,6 +42,8 @@ if(store.localData[index])
     temp_paragraph_array.pop(); // Remove last element 
     (temp_paragraph_array).forEach((paragraph) =>
     {
+      paragraph = paragraph.replaceAll('&nbsp;' , '');
+      
       if(paragraph.substring(0,1) === '#')
       {
         paragraph_list.push({tag : 'h1',content:paragraph.substring(1)});
@@ -150,7 +152,7 @@ const saveParagraph = ()=>
   paragraph_list.forEach(paragraph=>{
     if(paragraph.tag === 'p')
     {
-      text += `${paragraph.content}  \n\n`;
+      text += `${paragraph.content}&nbsp;\n\n`;
     }
     else if(paragraph.tag === 'blockquote')
     {
