@@ -24,8 +24,7 @@ a,
 @media (min-width: 1024px) {
   body {
     display: flex;
-    /* place-items: center; */
-    padding:24px;
+    place-items: center;
   }
 
   #app {

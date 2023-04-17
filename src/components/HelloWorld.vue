@@ -1,13 +1,5 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-//import postMessage from '../assets/js/message-post';
-
-//postMessage("message", {data:300});
-
-// setTimeout(()=>{
-  
-// },1000) 
-window.postMessage({msg:"Test", data:null}, location.origin);
 
 defineProps({
   msg: {
@@ -15,19 +7,6 @@ defineProps({
     required: true
   }
 })
-
-window.addEventListener("message", function(event){
-  const window_url = `http://${window.location.hostname}`;
-    // if(event.origin !== window_url) {
-    //   console.log(window_url);
-    //   console.log(event.origin);
-    //   return;
-    // }
-    if(event.data?.msg){
-      console.log(event.data.msg);
-    }
-}, false);
-
 
 </script>
 
@@ -53,15 +32,6 @@ window.addEventListener("message", function(event){
 </template>
 
 <style scoped>
-section.header{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-nav{
-  display: flex;
-  gap:12px;
-}
 h1 {
   font-weight: 500;
   font-size: 2.6rem;

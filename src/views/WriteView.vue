@@ -141,7 +141,7 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  document.querySelectorAll('.editor:last-child').forEach(editor => editor.focus());
+  document.querySelector('.editor:last-child')?.focus();
 })
 
 const saveParagraph = ()=>
