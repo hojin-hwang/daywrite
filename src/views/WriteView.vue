@@ -26,6 +26,8 @@ const router = useRouter();
 const index = (useRoute().params.id)? useRoute().params.id: null;
 const store = useArticleStore();
 
+console.log(store.completeDayWrite)
+
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
 const blank_line = {tag : 'p',content:'', placeholder:""};
