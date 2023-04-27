@@ -1,9 +1,9 @@
-import { ref, reactive,computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { marked } from 'marked'
 
 export const useArticleStore = defineStore('counter', () => {
-  const count = ref(120)
+  const completeDayWrite = ref(false);
   const localData = reactive(getData());
   function getData()
   {
@@ -26,11 +26,18 @@ export const useArticleStore = defineStore('counter', () => {
         return temp_array;
   }
 
+  function doneDayLog()
+  {
+    completeDayWrite.value = true;
+    return completeDayWrite;
+  }
+
   function addArticle(article) 
   {
     article.html = marked.parse(article.article);
     article.path = `/playground/vue-work/write/${article.archiveNo}`;
     localData.unshift(article);
+    doneDayLog();
   }
 
   function updateArticle(article, index)
@@ -44,5 +51,5 @@ export const useArticleStore = defineStore('counter', () => {
     localData.splice(index,1);
   }
 
-  return { localData, addArticle , updateArticle, deleteArticle}
+  return { localData, completeDayWrite, addArticle , updateArticle, deleteArticle, doneDayLog}
 })

@@ -46,12 +46,10 @@ const goEditor = (id) =>
 }
 
 </script>
-<style scoped>
-section{padding: 0.4rem 0 1rem calc(var(--section-gap) / 4);}
+<style>
 article{
   width: 100%;
   position: relative;
-  
 }
 
 h1{margin-bottom:12px; font-size: 18px; font-weight: bold;}
@@ -77,13 +75,13 @@ hr{
   height: 1px; border-top: 1px solid #3c3c39;
 }
 
-button.modify-article-btn
+.modify-article-btn
 {
   background: unset;
-  border: none;
-  position: absolute;
-  top: 0;
-  right: 0;
+    border: none;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 .create-date{
   text-align: right;
@@ -92,13 +90,5 @@ button.modify-article-btn
 }
 @media (min-width: 1024px) {
   
-}
-</style>
-<style>
-h1{
-    font-size: 1.2rem!important;
-    font-weight: 500;
-    margin-bottom: 0.4rem;
-    color: var(--color-heading);
 }
 </style>

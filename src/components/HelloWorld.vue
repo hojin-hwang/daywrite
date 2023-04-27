@@ -8,6 +8,7 @@ defineProps({
     required: true
   }
 })
+
 </script>
 
 <template>
@@ -28,15 +29,6 @@ defineProps({
 </template>
 
 <style scoped>
-section.header{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-nav{
-  display: flex;
-  gap:12px;
-}
 h1 {
   font-weight: 500;
   font-size: 2.6rem;
