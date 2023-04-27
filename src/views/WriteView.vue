@@ -141,7 +141,7 @@ const readFirstWord = (str, current_tag_name) =>
 
 onMounted(() => 
 {
-  document.querySelectorAll('.editor:last-child').forEach(editor => editor.focus());
+  if(!is_new_article) document.querySelectorAll('.editor:last-child').forEach(editor => editor.focus());
 })
 
 const saveParagraph = ()=>
@@ -282,6 +282,8 @@ button.delete:hover{background-color: hsla(33, 100%, 37%, 0.2);}
 
 
 @media (min-width: 1024px) {
-  
+  footer{
+    min-width: 50vw;
+  }
 }
 </style>

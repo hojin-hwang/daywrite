@@ -1,4 +1,5 @@
 <script setup>
+import GuideView from '../views/guideView.vue';
 import { RouterLink } from 'vue-router'
 
 defineProps({
@@ -20,8 +21,9 @@ defineProps({
     </section>
     
     <p>
-      한문장을 써보세요. 당신의 인생을 바꿔보세요.
+      한문장을 써보세요. 당신의 인생을 바꿔보세요
     </p>
+    <GuideView></GuideView>
   </div>
 </template>
 
@@ -51,6 +53,7 @@ h3 {
 }
 
 @media (min-width: 1024px) {
+  /* section.header{max-width: 10vw;} */
   .greetings h1,
   .greetings h3 {
     text-align: left;
