@@ -10,8 +10,8 @@
     <footer>
       <button type="button" @click="deleteParagraph" class="action delete">DEL</button>
       <button type="button" @click="saveParagraph" class="action save">SAVE</button>
-
     </footer>
+    <div class="test"></div>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ const router = useRouter();
 const index = (useRoute().params.id)? useRoute().params.id: null;
 const store = useArticleStore();
 
-console.log(store.completeDayWrite)
+console.log(store.completeDayWrite);
 
 const paragraph_list = reactive([]);
 const new_paragraph = {tag : 'p',content:'', placeholder:"제목은 '# ', 인용문은 '> '으로 시작해주세요"};
@@ -34,6 +34,9 @@ const blank_line = {tag : 'p',content:'', placeholder:""};
 let is_new_article = true;
 let create_date;
 
+onMounted(()=>{
+  
+});
 
 if(store.localData[index])
 {
@@ -58,7 +61,11 @@ if(store.localData[index])
       {
         paragraph_list.push({tag : 'p',content:paragraph});
       }
-    })
+    });
+    console.log(store.localData[index].article.replaceAll('test','--'));
+    console.log(store._localData[index].article)
+    console.log(temp_paragraph_array)
+    
 }
 else //신규다
 {
@@ -191,7 +198,7 @@ const deleteParagraph = ()=>
   if(store.localData[index].archiveNo && localStorage.getItem(store.localData[index].archiveNo)) 
   {
     localStorage.removeItem(store.localData[index].archiveNo);
-    store.deleteArticle(index);
+    store.deleteArticle(index, store.localData[index]);
   }
   router.push({name: 'readContentById', params:{no:index}});
 }
