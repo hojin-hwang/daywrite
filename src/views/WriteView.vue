@@ -41,14 +41,17 @@ onMounted(()=>{
 if(store.localData[index])
 {
     is_new_article = false;
-    const temp_paragraph_array = store.localData[index].article.split('\n\n');
+    const temp_paragraph_array = `${store.localData[index].article}`.split('\r\n\r');
     create_date = store.localData[index].createDate;
-
+    
     temp_paragraph_array.pop(); // Remove last element 
     (temp_paragraph_array).forEach((paragraph) =>
     {
       paragraph = paragraph.replaceAll('&nbsp;' , '');
-      
+      paragraph = paragraph.replace('\n' , '');
+      paragraph = paragraph.replace('\n\r' , '');
+      paragraph = paragraph.replace('\n\r\n' , '');
+
       if(paragraph.substring(0,1) === '#')
       {
         paragraph_list.push({tag : 'h1',content:paragraph.substring(1)});
@@ -65,7 +68,6 @@ if(store.localData[index])
     console.log(store.localData[index].article.replaceAll('test','--'));
     console.log(store._localData[index].article)
     console.log(temp_paragraph_array)
-    
 }
 else //신규다
 {

@@ -73,7 +73,6 @@ export const useArticleStore = defineStore('counter', () =>
     localData.unshift(article);
     
     sendDataBase("POST", article);
-
     doneDayLog();
   }
 
@@ -102,7 +101,9 @@ export const useArticleStore = defineStore('counter', () =>
         console.log("처리됨");
       }
     };
+    
     for (const key in article) formData.append(key, article[key]);
+    
     xhr.send(formData);
 
     return;
